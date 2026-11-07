@@ -1,0 +1,55 @@
+name: Build DXVK 2.5 without Memory Mapped Files
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y meson ninja-build mingw-w64 glslang-tools python3-mako
+
+      - name: Download DXVK 2.5 source
+        uses: actions/checkout@v4
+        with:
+          repository: doitsujin/dxvk
+          ref: v2.5
+          submodules: recursive
+          path: dxvk
+
+      - name: Disable Memory Mapped Files
+        run: |
+          cd dxvk
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("src/d3d9/d3d9_mem.h")
+          s = p.read_text()
+          old = "#if defined(_WIN32) && !defined(_WIN64)"
+          new = "#if defined(_WIN32) && !defined(_WIN64) && defined(D3D9_ENABLE_UNMAPPING)"
+          assert old in s
+          p.write_text(s.replace(old, new, 1))
+          PY
+
+      - name: Build 32-bit DXVK
+        run: |
+          cd dxvk
+          meson setup --cross-file build-win32.txt --buildtype release build.win32
+          ninja -C build.win32
+
+      - name: Save DLL
+        run: |
+          mkdir -p artifact
+          find dxvk/build.win32 -iname d3d9.dll -exec cp {} artifact/d3d9.dll \;
+          test -s artifact/d3d9.dll
+
+      - name: Upload DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: DXVK-2.5-no-MMAP-Win32
+          path: artifact/d3d9.dll
