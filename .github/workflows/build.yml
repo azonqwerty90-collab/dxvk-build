@@ -36,11 +36,16 @@ jobs:
           p.write_text(s.replace(old, new, 1))
           PY
 
-      - name: Fix condition_variable header
+            - name: Fix condition_variable header
         run: |
           sed -i '1i #include <condition_variable>' dxvk/src/util/thread.h
 
-        meson setup --cross-file build-win32.txt --buildtype release -Denable_d3d11=false -Denable_d3d10=false -Denable_dxgi=false build.win32
+      - name: Build 32-bit DXVK
+        run: |
+          cd dxvk
+          meson setup --cross-file build-win32.txt --buildtype release -Denable_d3d11=false build.win32
+          ninja -C build.win32
+
       - name: Save DLL
         run: |
           mkdir -p artifact
