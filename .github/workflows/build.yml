@@ -36,6 +36,10 @@ jobs:
           p.write_text(s.replace(old, new, 1))
           PY
 
+      - name: Fix condition_variable header
+        run: |
+          sed -i '1i #include <condition_variable>' dxvk/src/util/thread.h
+
       - name: Build 32-bit DXVK
         run: |
           cd dxvk
