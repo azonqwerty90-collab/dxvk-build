@@ -14,7 +14,7 @@ jobs:
         run: |
           sudo apt install -y meson ninja-build mingw-w64 g++-mingw-w64-i686-posix gcc-mingw-w64-i686-posix glslang-tools python3
           sudo update-alternatives --set i686-w64-mingw32-g++ /usr/bin/i686-w64-mingw32-g++-posix
-sudo update-alternatives --set i686-w64-mingw32-gcc /usr/bin/i686-w64-mingw32-gcc-posix
+          sudo update-alternatives --set i686-w64-mingw32-gcc /usr/bin/i686-w64-mingw32-gcc-posix
       - name: Download DXVK 2.5 source
         uses: actions/checkout@v4
         with:
